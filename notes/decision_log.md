@@ -31,3 +31,12 @@
 - Look into the discontinuity near BTJD 1348
 - Repeat scatter test after flare clipping and detrending
 - Download all sectors
+
+## Phase 2, all-sector table (31 Oct 2026)
+- 37 sectors downloaded to data/ (not tracked by git); table saved in notes/sector_table.csv
+- Good cadences per sector: 12379 (S3) to 20257 (S89); S97 anomalous at 29075 over 52 days (to check)
+- Per-point scatter 1605-1840 ppm; no sector stands out
+- Total about 589,500 cadences (about 820 days); Year 1 (S1-13) about 169,000 (about 234 days)
+- Rough expected transits (all sectors): b about 82, c about 51, d about 22
+- Many sectors lost 25-40% of cadences to the default quality mask
+- To do: check S97 gaps; choose flare-clipping threshold from the sigma counts
