@@ -1,0 +1,16 @@
+name: toi700
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - astropy
+  - emcee
+  - corner
+  - jupyterlab
+  - matplotlib
+  - numpy
+  - scipy
+  - git
+  - ipykernel
+  - dynesty
+  - pandas
