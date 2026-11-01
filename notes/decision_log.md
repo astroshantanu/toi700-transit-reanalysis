@@ -40,3 +40,17 @@
 - Rough expected transits (all sectors): b about 82, c about 51, d about 22
 - Many sectors lost 25-40% of cadences to the default quality mask
 - To do: check S97 gaps; choose flare-clipping threshold from the sigma counts
+
+## Sector 97 (1 Nov 2026)
+- 29075 cadences over 52 days: four TESS orbits (extended sector, Cycle 8). Not an error.
+- Gaps: 3.2, 3.3, 3.9 d (BTJD 3946.9-3950.1, 3960.3-3963.6, 3974.4-3978.3)
+- Short breaks (<0.5 d) inside each orbit near BTJD 3941, 3954, 3967, 3982 (cause not verified)
+- Handling: detrend per orbit (wotan break_tolerance splits at gaps); normalize per sector
+
+## Outlier counts, all sectors (1 Nov 2026)
+- Robust sigma per sector; counted points beyond 4 and 5 sigma, high and low
+- Totals beyond 4 sigma: 114 high, 27 low, about 18.7 expected per side from random noise
+- Beyond 5 sigma: 8 high, 0 low. Sector 6 stands out (13 high beyond 4 sigma)
+- Rule under consideration: clip upward only (transits are dips), 4-5 sigma
+- Threshold not yet fixed; to do: look at sector 6 flagged points, then apply to all sectors
+- Counts made on raw flux, before detrending; revisit after Phase 3
