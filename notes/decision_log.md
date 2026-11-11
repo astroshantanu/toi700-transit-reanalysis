@@ -54,3 +54,23 @@
 - Rule under consideration: clip upward only (transits are dips), 4-5 sigma
 - Threshold not yet fixed; to do: look at sector 6 flagged points, then apply to all sectors
 - Counts made on raw flux, before detrending; revisit after Phase 3
+
+## Why robust sigma instead of the ordinary standard deviation (11 Nov 2026)
+- Flares are extreme points. They inflate the ordinary standard deviation, which makes the flares themselves look less extreme.
+- Toy example: a point of 30 among values near 10 has z = 2.62 with the ordinary std (missed at 3 sigma) but z = 26.3 with robust sigma.
+- Robust sigma = 1.4826 x median(|x - median(x)|). It uses medians, which ignore extreme values, so flares cannot inflate it. The factor 1.4826 puts it on the same scale as an ordinary sigma for a bell-shaped distribution.
+- Sector 1 check: robust sigma 1672 ppm vs ordinary std 1656 ppm (within 1%), so sector 1 has no significant flares. Counts beyond 3 sigma (29 high, 17 low) reproduced step by step.
+
+## Flare and outlier clipping rule (11 Nov 2026)
+- Sector 6 inspected: 13 points above 4 sigma (0.46 expected from noise); mostly isolated single points; only one adjacent pair
+- Most extreme (BTJD 1476.1791, z = 5.3) is a one-point spike with normal neighbours
+- 7 of 13 fall within ~1 day after an orbit start (BTJD ~1468.3 and ~1478.5): suggests instrumental origin
+- Decision: clip points more than 4 robust sigma ABOVE the median, per sector. Never clip low points (transits are dips).
+- Cost: ~0.5 good points per sector removed by chance; all-sector total expected ~19 of ~114 removed
+- To revisit after detrending (Phase 3)
+
+## Clipping applied (11 Nov 2026)
+- clean_sector(lc, k=4.0): remove NaNs, normalize, robust sigma per sector, remove points with z > 4 (upward only)
+- Result: 114 points removed out of 589,532 (0.02%); 589,418 kept. Matches earlier counts sector by sector.
+- Sectors with 0 removed: 1, 11, 89, 93. Most removed: sector 6 (13)
+- The lightkurve warning about 30% of cadences masked (5871/19412) is the default quality mask; it did not refer to sector 6 (14,483 before clipping)
