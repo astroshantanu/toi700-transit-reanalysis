@@ -39,3 +39,5 @@ Checked 11 Nov 2026: density, luminosity, log g, a/R*, durations and planet radi
 - Impact parameter, +/-: b 0.20 (+0.19, -0.14); c 0.904 (+0.016, -0.024); d 0.40 (+0.15, -0.22)
 - TO VERIFY in the PDF: duration uncertainty for b (maybe -0.07) and for d; a/R* for d (84.0)
 - Fit setup in the paper: 2-min SPOC light curves, each sector modelled separately with a Gaussian process; density prior 8.0 g/cm3 with 0.3 dex width; Kipping limb darkening; Beta eccentricity prior
+- Duration T14 (h) as printed in Table 2: b 2.15 (+0.15, -0.7); c 1.41 (+0.14, -0.09); d 3.21 (+0.27, -0.26)
+- Note: the -0.7 for b looks inconsistent with +0.15 and the ~5% error on a/R* (possible typo in the paper). Not used for anything except mask width; recorded as printed.
