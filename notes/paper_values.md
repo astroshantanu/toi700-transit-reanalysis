@@ -30,3 +30,12 @@ Checked 11 Nov 2026: density, luminosity, log g, a/R*, durations and planet radi
 
 ## Notes
 - BJD - 2457000 is the same as BTJD, so T0 values can be used directly with our data.
+
+## Uncertainties and sources (Gilbert et al. 2020; checked 12 Nov 2026)
+- Star: Table 1. Planets: Table 2 ("Model Parameters" for T0, "Derived Parameters" for the rest). Photodynamical fit (Table 3) not used.
+- P (d), +/-: b 9.97701 (+0.00024, -0.00028); c 16.051098 (+0.000089, -0.000092); d 37.4260 (+0.0007, -0.0010)
+- T0 (BJD-2457000), +/-: b 1331.3547 (+0.0048, -0.0032); c 1340.0887 (+0.0011, -0.0010); d 1330.4737 (+0.0035, -0.0040)
+- Rp/R*, +/-: b 0.0221 (+0.0011, -0.0012); c 0.0574 (+0.0032, -0.0026); d 0.0262 (+0.0014, -0.0015)
+- Impact parameter, +/-: b 0.20 (+0.19, -0.14); c 0.904 (+0.016, -0.024); d 0.40 (+0.15, -0.22)
+- TO VERIFY in the PDF: duration uncertainty for b (maybe -0.07) and for d; a/R* for d (84.0)
+- Fit setup in the paper: 2-min SPOC light curves, each sector modelled separately with a Gaussian process; density prior 8.0 g/cm3 with 0.3 dex width; Kipping limb darkening; Beta eccentricity prior

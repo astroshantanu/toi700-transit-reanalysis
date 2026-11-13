@@ -1,5 +1,5 @@
-# Values from Gilbert et al. 2020 (arXiv:2001.00952)
-# Times are BJD - 2457000 (same as BTJD). Durations in hours.
+# Values from Gilbert et al. 2020 (arXiv:2001.00952): Table 1 (star), Table 2 (planets)
+# Times are BJD - 2457000 (same as BTJD). Durations in hours. Errors are (+, -).
 
 STAR = {
     "tic": 150428135,
@@ -12,7 +12,10 @@ STAR = {
 }
 
 PLANETS = {
-    "b": {"P": 9.97701,   "T0": 1331.3547, "T14_h": 2.15, "k": 0.0221, "impact": 0.20,  "a_over_R": 34.8, "Rp_earth": 1.010},
-    "c": {"P": 16.051098, "T0": 1340.0887, "T14_h": 1.41, "k": 0.0574, "impact": 0.904, "a_over_R": 47.8, "Rp_earth": 2.63},
-    "d": {"P": 37.4260,   "T0": 1330.4737, "T14_h": 3.21, "k": 0.0262, "impact": 0.40,  "a_over_R": 84.0, "Rp_earth": 1.19},
+    "b": {"P": 9.97701,   "P_err": (0.00024, 0.00028),   "T0": 1331.3547, "T0_err": (0.0048, 0.0032),
+          "T14_h": 2.15, "k": 0.0221, "impact": 0.20,  "a_over_R": 34.8, "Rp_earth": 1.010},
+    "c": {"P": 16.051098, "P_err": (0.000089, 0.000092), "T0": 1340.0887, "T0_err": (0.0011, 0.0010),
+          "T14_h": 1.41, "k": 0.0574, "impact": 0.904, "a_over_R": 47.8, "Rp_earth": 2.63},
+    "d": {"P": 37.4260,   "P_err": (0.0007, 0.0010),     "T0": 1330.4737, "T0_err": (0.0035, 0.0040),
+          "T14_h": 3.21, "k": 0.0262, "impact": 0.40,  "a_over_R": 84.0, "Rp_earth": 1.19},
 }
