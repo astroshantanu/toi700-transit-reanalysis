@@ -1,0 +1,537 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "f7c6d76b-e3b7-4ea4-afb4-f7e79f056aab",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Warning: 30% (5871/19412) of the cadences will be ignored due to the quality mask (quality_bitmask=17087).\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "37 sectors | 589418 points | 114 removed\n"
+     ]
+    }
+   ],
+   "source": [
+    "#LOADING DATA\n",
+    "\n",
+    "%matplotlib inline\n",
+    "import sys\n",
+    "sys.path.append(\"../src\")\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "\n",
+    "from cleaning import load_all_clean\n",
+    "from toi700_params import PLANETS\n",
+    "\n",
+    "sectors_data = load_all_clean()\n",
+    "print(len(sectors_data), \"sectors |\",\n",
+    "      sum(len(d[\"time\"]) for d in sectors_data), \"points |\",\n",
+    "      sum(d[\"n_removed\"] for d in sectors_data), \"removed\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "affde25e-586d-42f8-9b92-77a88c1448ed",
+   "metadata": {},
+   "source": [
+    "## Part 1: Analysing One Transit of Planet b In Sector 1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "82dc77d9-0b42-4a5b-8ca5-952c8828bddf",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{'P': 9.97701, 'P_err': (0.00024, 0.00028), 'T0': 1331.3547, 'T0_err': (0.0048, 0.0032), 'T14_h': 2.15, 'T14_err': (0.15, 0.7), 'k': 0.0221, 'impact': 0.2, 'a_over_R': 34.8, 'Rp_earth': 1.01}\n",
+      "period: 9.97701 | first transit T0: 1331.3547 | duration (hours): 2.15\n"
+     ]
+    }
+   ],
+   "source": [
+    "#Looking at Planet b\n",
+    "\n",
+    "p = PLANETS[\"b\"]\n",
+    "print(p)\n",
+    "print(\"period:\", p[\"P\"], \"| first transit T0:\", p[\"T0\"], \"| duration (hours):\", p[\"T14_h\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "5c317089-828a-4962-ba1f-cb1e73535191",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "half-duration in days: 0.04479166666666667\n",
+      "half-duration in minutes: 64.5\n"
+     ]
+    }
+   ],
+   "source": [
+    "#half width of the transit\n",
+    "\n",
+    "half = p[\"T14_h\"] / 24 / 2\n",
+    "print(\"half-duration in days:\", half)\n",
+    "print(\"half-duration in minutes:\", half * 24 * 60)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "b4b55bd1-d87d-4456-8576-3801bb26d1f4",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "sector: 1\n",
+      "number of points: 18279\n",
+      "first time: 1325.2954950150029 | last time: 1353.1759744851113\n"
+     ]
+    }
+   ],
+   "source": [
+    "#looking at Sector 1\n",
+    "\n",
+    "d = sectors_data[0]\n",
+    "t = d[\"time\"]\n",
+    "print(\"sector:\", d[\"sector\"])\n",
+    "print(\"number of points:\", len(t))\n",
+    "print(\"first time:\", t.min(), \"| last time:\", t.max())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "c9040e5e-0db0-4ee3-bd08-d958dbfa04bf",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "x_lo: -0.6118062076377512\n",
+      "x_hi: 2.1916452075098536\n",
+      "Total transits for Planet b in Sector 1 are:  3\n"
+     ]
+    }
+   ],
+   "source": [
+    "#Predicting the transits of Planet b in Sector 1\n",
+    "x_lo = (t.min() - half - p[\"T0\"]) / p[\"P\"]\n",
+    "x_hi = (t.max() + half - p[\"T0\"]) / p[\"P\"]\n",
+    "print(\"x_lo:\", x_lo)\n",
+    "print(\"x_hi:\", x_hi)\n",
+    "\n",
+    "#bringing it up to whole numbers because Transits cannot be fractional\n",
+    "n_lo = int(np.ceil(x_lo))\n",
+    "n_hi = int(np.floor(x_hi))\n",
+    "print(\"Total transits for Planet b in Sector 1 are: \" , n_hi + 1 - n_lo )  # +1 in n_hi because we gotta count the 0th orbit too"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "a66cda08-818f-42e9-80b3-99a1dfdca78b",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "predicted mid-transit time: 1331.3547\n"
+     ]
+    }
+   ],
+   "source": [
+    "n = 0\n",
+    "tc = p[\"T0\"] + n * p[\"P\"]\n",
+    "print(\"predicted mid-transit time:\", tc)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "id": "8706fae4-fd99-4e7a-a547-4b07e91b9a05",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "first 5 distances (days): [6.05920498 6.0578161  6.05642722 6.05503834 6.05364945]\n",
+      "closest point is 0.0005038312228862196 days away\n"
+     ]
+    }
+   ],
+   "source": [
+    "#how far each data point is from Transit?\n",
+    "\n",
+    "distance = np.abs(t - tc)\n",
+    "print(\"first 5 distances (days):\", distance[:5])  #because the data stars aprrocimately 6 days before the first transit\n",
+    "print(\"closest point is\", distance.min(), \"days away\")   "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "id": "2db46c33-633c-4178-ad98-06ca66e9f29d",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "first 5 True/False values: [False False False False False]\n",
+      "points inside the transit: 64\n"
+     ]
+    }
+   ],
+   "source": [
+    "#Number of points inside the transit\n",
+    "\n",
+    "inside = distance < half\n",
+    "print(\"first 5 True/False values:\", inside[:5])   #checking the first 5 points which i know are not inside the transit\n",
+    "print(\"points inside the transit:\", inside.sum())\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "id": "81d4ee94-88fe-43fe-8855-545b2eae47d5",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "expected points for a complete transit: 64.5\n",
+      "fraction covered: 0.9922480620155039\n"
+     ]
+    }
+   ],
+   "source": [
+    "# checking how complete is a transit\n",
+    "\n",
+    "expected = 2 * half * 720\n",
+    "print(\"expected points for a complete transit:\", expected)\n",
+    "print(\"fraction covered:\", inside.sum() / expected)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7e134dd2-04b6-44d8-aa08-f2d11e481571",
+   "metadata": {},
+   "source": [
+    "## Part 2: All Transits of Planet b in Sector 1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "id": "f396da94-49ea-4a5f-bc90-63401a48107c",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "n=0  tc=1331.355  points inside=64  fraction=0.99\n",
+      "n=1  tc=1341.332  points inside=65  fraction=1.01\n",
+      "n=2  tc=1351.309  points inside=61  fraction=0.95\n"
+     ]
+    }
+   ],
+   "source": [
+    "#calculating at which time the transit occuered for Planet b in Sector 1\n",
+    "\n",
+    "for n in range(n_lo, n_hi + 1):\n",
+    "    tc = p[\"T0\"] + n * p[\"P\"]\n",
+    "    inside = np.abs(t - tc) < half\n",
+    "    print(f\"n={n}  tc={tc:.3f}  points inside={inside.sum()}  fraction={inside.sum()/expected:.2f}\")\n",
+    "\n",
+    "#Basically doing the above calculation for all the 3 transits in Sector 1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "id": "f3958f1a-c37b-4a17-b21d-92a12c1402ef",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "  planet  sector  epoch        tc  frac\n",
+      "0      b       1      0  1331.355  0.99\n",
+      "1      b       1      1  1341.332  1.01\n",
+      "2      b       1      2  1351.309  0.95\n"
+     ]
+    }
+   ],
+   "source": [
+    "#turning it into a table\n",
+    "\n",
+    "rows = []\n",
+    "for n in range(n_lo, n_hi + 1):\n",
+    "    tc = p[\"T0\"] + n * p[\"P\"]\n",
+    "    inside = np.abs(t - tc) < half\n",
+    "    rows.append({\"planet\": \"b\", \"sector\": d[\"sector\"], \"epoch\": n,\n",
+    "                 \"tc\": round(tc, 3), \"frac\": round(inside.sum() / expected, 2)})\n",
+    "\n",
+    "table = pd.DataFrame(rows)\n",
+    "print(table)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a7db35ff-9715-46d7-97da-0d1d016f47ae",
+   "metadata": {},
+   "source": [
+    "## Part 3: All transits of Planet b in All sectors"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "id": "6a8c5f56-00a8-4f87-bd5e-541201ca237e",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "96 predicted transits of b\n"
+     ]
+    }
+   ],
+   "source": [
+    "rows = []\n",
+    "for d in sectors_data:\n",
+    "    t = d[\"time\"]\n",
+    "    n_lo = int(np.ceil((t.min() - half - p[\"T0\"]) / p[\"P\"]))\n",
+    "    n_hi = int(np.floor((t.max() + half - p[\"T0\"]) / p[\"P\"]))\n",
+    "    n_in_sector = n_hi + 1 - n_lo\n",
+    "    for n in range(n_lo, n_hi + 1):\n",
+    "        tc = p[\"T0\"] + n * p[\"P\"]\n",
+    "        inside = np.abs(t - tc) < half\n",
+    "        rows.append({\"planet\": \"b\", \"sector\": d[\"sector\"], \"epoch\": n,\n",
+    "                     \"tc\": round(tc, 3), \"frac\": round(inside.sum() / expected, 2), \"n_in_sector\": n_in_sector})\n",
+    "\n",
+    "cov_b = pd.DataFrame(rows)\n",
+    "print(len(cov_b), \"predicted transits of b\") #includes the ones that are not part of observations, missing in gaps between the data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "73701b14-17f2-4d7b-abb6-e336f6d707c0",
+   "metadata": {},
+   "source": [
+    "## Part 4: Creating a fucntion and doing it for all planets"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "id": "7f67b097-a257-42c3-8805-0d429f066d36",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "True\n"
+     ]
+    }
+   ],
+   "source": [
+    "#Making a function that can be used for all planets\n",
+    "\n",
+    "def coverage(planet, sectors_data):\n",
+    "    p = PLANETS[planet]                          # cell 1\n",
+    "    half = p[\"T14_h\"] / 24 / 2                   # cell 2\n",
+    "    expected = 2 * half * 720                    # cell 9\n",
+    "    rows = []\n",
+    "    for d in sectors_data:                       # cell 12: loop over sectors\n",
+    "        t = d[\"time\"]                            # cell 3\n",
+    "        n_lo = int(np.ceil((t.min() - half - p[\"T0\"]) / p[\"P\"]))    # cells 4-5\n",
+    "        n_hi = int(np.floor((t.max() + half - p[\"T0\"]) / p[\"P\"]))\n",
+    "        n_in_sector = n_hi + 1 - n_lo\n",
+    "        for n in range(n_lo, n_hi + 1):          # cell 10: loop over transits\n",
+    "            tc = p[\"T0\"] + n * p[\"P\"]            # cell 6\n",
+    "            inside = np.abs(t - tc) < half       # cells 7-8\n",
+    "            rows.append({\"planet\": planet, \"sector\": d[\"sector\"], \"epoch\": n,\n",
+    "                         \"tc\": round(tc, 3), \"frac\": round(inside.sum() / expected, 2), \"n_in_sector\": n_in_sector})\n",
+    "    return pd.DataFrame(rows)                    # cell 11\n",
+    "\n",
+    "cov_b2 = coverage(\"b\", sectors_data)\n",
+    "print(cov_b2.equals(cov_b))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "id": "dbcb8de3-0812-46f8-ad01-e8701930baca",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "b 96 predicted transits\n",
+      "c 54 predicted transits\n",
+      "d 26 predicted transits\n"
+     ]
+    }
+   ],
+   "source": [
+    "cov = pd.concat([coverage(\"b\", sectors_data),\n",
+    "                 coverage(\"c\", sectors_data),\n",
+    "                 coverage(\"d\", sectors_data)], ignore_index=True)\n",
+    "\n",
+    "for name in [\"b\", \"c\", \"d\"]:\n",
+    "    print(name, (cov[\"planet\"] == name).sum(), \"predicted transits\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "id": "6624a284-029e-42bd-95b9-001c1a9067b7",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "planet  sector  epoch       tc  frac  n_in_sector  tierA\n",
+      "     b       1      0 1331.355  0.99            3   True\n",
+      "     b       1      1 1341.332  1.01            3   True\n",
+      "     b       1      2 1351.309  0.95            3   True\n",
+      "     b       3      6 1391.217  0.98            2   True\n",
+      "     b       3      7 1401.194  1.01            2   True\n",
+      "     b       4      8 1411.171  0.99            3   True\n"
+     ]
+    }
+   ],
+   "source": [
+    "tierA = {1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13}\n",
+    "cov[\"tierA\"] = cov[\"sector\"].isin(tierA)\n",
+    "print(cov.head(6).to_string(index=False))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "id": "7fa2edd9-1ddf-473c-af48-994b3ac572ed",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "7 predicted transits of d in Tier A\n",
+      "planet  sector  epoch       tc  frac  n_in_sector  tierA\n",
+      "     d       1      0 1330.474  1.00            1   True\n",
+      "     d       3      2 1405.326  1.00            1   True\n",
+      "     d       5      3 1442.752  1.00            1   True\n",
+      "     d       6      4 1480.178  1.01            1   True\n",
+      "     d       9      6 1555.030  1.00            1   True\n",
+      "     d      10      7 1592.456  0.99            1   True\n",
+      "     d      13      9 1667.308  1.00            1   True\n",
+      "with fraction >= 0.5: 7\n",
+      "with fraction >= 0.9: 7\n"
+     ]
+    }
+   ],
+   "source": [
+    "sub = cov[(cov[\"planet\"] == \"d\") & (cov[\"tierA\"])]\n",
+    "print(len(sub), \"predicted transits of d in Tier A\")\n",
+    "print(sub.to_string(index=False))\n",
+    "print(\"with fraction >= 0.5:\", (sub[\"frac\"] >= 0.5).sum())\n",
+    "print(\"with fraction >= 0.9:\", (sub[\"frac\"] >= 0.9).sum())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "id": "d76f42cc-9838-428a-b2e4-10f259de7b36",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "planet    set  predicted  frac>=0.5  frac>=0.9\n",
+      "     b Tier A         28         24         22\n",
+      "     b    All         96         83         81\n",
+      "     c Tier A         15         12         12\n",
+      "     c    All         54         47         47\n",
+      "     d Tier A          7          7          7\n",
+      "     d    All         26         24         23\n"
+     ]
+    }
+   ],
+   "source": [
+    "rows = []\n",
+    "for name in [\"b\", \"c\", \"d\"]:\n",
+    "    planet_rows = cov[cov[\"planet\"] == name]\n",
+    "    tierA_rows = planet_rows[planet_rows[\"tierA\"]]\n",
+    "    for label, sub in [(\"Tier A\", tierA_rows), (\"All\", planet_rows)]:\n",
+    "        rows.append({\"planet\": name, \"set\": label, \"predicted\": len(sub),\n",
+    "                     \"frac>=0.5\": int((sub[\"frac\"] >= 0.5).sum()),\n",
+    "                     \"frac>=0.9\": int((sub[\"frac\"] >= 0.9).sum())})\n",
+    "\n",
+    "print(pd.DataFrame(rows).to_string(index=False))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fd83ab9c-2243-4b4a-9f5b-b358d5cb8721",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python (toi700)",
+   "language": "python",
+   "name": "toi700"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.18"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
