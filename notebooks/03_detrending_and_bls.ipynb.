@@ -368,29 +368,29 @@
     "#Making a function that can be used for all planets\n",
     "\n",
     "def coverage(planet, sectors_data):\n",
-    "    p = PLANETS[planet]                          # cell 1\n",
-    "    half = p[\"T14_h\"] / 24 / 2                   # cell 2\n",
-    "    expected = 2 * half * 720                    # cell 9\n",
+    "    p = PLANETS[planet]                          \n",
+    "    half = p[\"T14_h\"] / 24 / 2                   \n",
+    "    expected = 2 * half * 720                    \n",
     "    rows = []\n",
-    "    for d in sectors_data:                       # cell 12: loop over sectors\n",
-    "        t = d[\"time\"]                            # cell 3\n",
-    "        n_lo = int(np.ceil((t.min() - half - p[\"T0\"]) / p[\"P\"]))    # cells 4-5\n",
+    "    for d in sectors_data:                       \n",
+    "        t = d[\"time\"]                            \n",
+    "        n_lo = int(np.ceil((t.min() - half - p[\"T0\"]) / p[\"P\"]))    \n",
     "        n_hi = int(np.floor((t.max() + half - p[\"T0\"]) / p[\"P\"]))\n",
     "        n_in_sector = n_hi + 1 - n_lo\n",
-    "        for n in range(n_lo, n_hi + 1):          # cell 10: loop over transits\n",
-    "            tc = p[\"T0\"] + n * p[\"P\"]            # cell 6\n",
-    "            inside = np.abs(t - tc) < half       # cells 7-8\n",
+    "        for n in range(n_lo, n_hi + 1):          \n",
+    "            tc = p[\"T0\"] + n * p[\"P\"]            \n",
+    "            inside = np.abs(t - tc) < half       \n",
     "            rows.append({\"planet\": planet, \"sector\": d[\"sector\"], \"epoch\": n,\n",
     "                         \"tc\": round(tc, 3), \"frac\": round(inside.sum() / expected, 2), \"n_in_sector\": n_in_sector})\n",
-    "    return pd.DataFrame(rows)                    # cell 11\n",
+    "    return pd.DataFrame(rows)                    \n",
     "\n",
     "cov_b2 = coverage(\"b\", sectors_data)\n",
-    "print(cov_b2.equals(cov_b))"
+    "print(cov_b2.equals(cov_b))    #checking if the table is same as previous convergance table"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 33,
+   "execution_count": 38,
    "id": "dbcb8de3-0812-46f8-ad01-e8701930baca",
    "metadata": {},
    "outputs": [
@@ -410,12 +410,14 @@
     "                 coverage(\"d\", sectors_data)], ignore_index=True)\n",
     "\n",
     "for name in [\"b\", \"c\", \"d\"]:\n",
-    "    print(name, (cov[\"planet\"] == name).sum(), \"predicted transits\")"
+    "    print(name, (cov[\"planet\"] == name).sum(), \"predicted transits\")\n",
+    "\n",
+    "#stacking tables for all 3 planets together, and the loop counts how many rows for each planet"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 34,
+   "execution_count": 42,
    "id": "6624a284-029e-42bd-95b9-001c1a9067b7",
    "metadata": {},
    "outputs": [
@@ -436,7 +438,9 @@
    "source": [
     "tierA = {1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13}\n",
     "cov[\"tierA\"] = cov[\"sector\"].isin(tierA)\n",
-    "print(cov.head(6).to_string(index=False))"
+    "print(cov.head(6).to_string(index=False))\n",
+    "\n",
+    "#checking which sectors are in tier A (which is the previous published result sectors)"
    ]
   },
   {
@@ -464,6 +468,8 @@
     }
    ],
    "source": [
+    "#Checking for planet d, and its transits in sector Tier A\n",
+    "\n",
     "sub = cov[(cov[\"planet\"] == \"d\") & (cov[\"tierA\"])]\n",
     "print(len(sub), \"predicted transits of d in Tier A\")\n",
     "print(sub.to_string(index=False))\n",
@@ -473,7 +479,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 36,
+   "execution_count": 43,
    "id": "d76f42cc-9838-428a-b2e4-10f259de7b36",
    "metadata": {},
    "outputs": [
@@ -492,6 +498,8 @@
     }
    ],
    "source": [
+    "#This is just the cell above but for all planets\n",
+    "\n",
     "rows = []\n",
     "for name in [\"b\", \"c\", \"d\"]:\n",
     "    planet_rows = cov[cov[\"planet\"] == name]\n",
