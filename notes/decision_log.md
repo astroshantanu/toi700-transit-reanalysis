@@ -74,3 +74,5 @@
 - Result: 114 points removed out of 589,532 (0.02%); 589,418 kept. Matches earlier counts sector by sector.
 - Sectors with 0 removed: 1, 11, 89, 93. Most removed: sector 6 (13)
 - The lightkurve warning about 30% of cadences masked (5871/19412) is the default quality mask; it did not refer to sector 6 (14,483 before clipping)
+
+
