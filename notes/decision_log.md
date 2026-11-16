@@ -76,3 +76,59 @@
 - The lightkurve warning about 30% of cadences masked (5871/19412) is the default quality mask; it did not refer to sector 6 (14,483 before clipping)
 
 
+## ## TOI-700 reanalysis: detrending (wotan) and BLS prep — log
+
+### What wotan does
+- Removes slow trends (stellar variability, pointing, scattered light); keeps transits.
+- Output: flat = flux / trend. It does NOT search for planets.
+- Call: flatten(t, f, method="biweight", window_length=<days>,
+  break_tolerance=0.5, return_trend=True)
+- window_length is in DAYS. Rule: >= 3x longest transit duration
+  (d: 3.21 h -> >= 9.6 h). Too short = eats transits; too long = leaves variability.
+- break_tolerance=0.5: segments split at gaps > 0.5 d (TESS orbit gaps).
+- Biweight = robust average that down-weights outliers (dips, flares).
+
+### Transit mask (why and how)
+- In-transit points pull the trend down -> shallower transits. So exclude them
+  when estimating the trend.
+- mask |= |t - tc| < half*margin + pad   (margin = 1.5)
+- pad = hypot(T0_err, n * P_err): predicted-time error grows with epoch n.
+- Procedure: wotan on t[~mask] only -> np.interp trend across masked gaps
+  -> flat = f / trend.
+- np.isfinite() filter first to drop NaN trend values.
+
+### Window test (all planets, all sectors, masked transits)
+- Depth = median(flat outside) - median(flat inside). Needs all transits, not
+  one: a single transit is too noisy (sector-1 result was noise).
+- Depth insensitive to window 9.6-18 h -> use 12-14.4 h.
+- Caveat: masked test does not show whether a BLIND search would erase transits
+  -> injection-recovery test is still to do.
+
+### Results so far
+- Test 1 (Tier A vs later sectors):
+  - b: 0.00042 vs 0.00027 (expected 0.00049); d: 0.00070 vs 0.00019 (expected 0.00069)
+    -> published ephemerides of b and d drift (P error x epoch). The planets
+    did not change; the predictions got worse.
+  - c: 0.00188 vs 0.00211 -> timing still holds, BUT depth ~0.6 of k^2 in both groups.
+- Test 2 (sectors 27, 28, 97, 1-hour bins): no visible slow drifts.
+  Scatter vs white noise: 27 = 1.34x, 28 = 1.14x, 97 = 1.07x.
+- Possible dip near t ~ 2041.6 in sector 27; d predicted at ~2041.57. To check.
+
+### Open issues
+- c depth low in BOTH groups -> not timing. Check PLANETS["c"] k and T14_h
+  vs paper; try central-half window test.
+- `expected = 2*half*720` assumes 2-min cadence; wrong for 20 s / 200 s sectors.
+- coverage(): add out-of-transit baseline column (distance to nearest gap).
+- Sector 27 residual noise: check with robust std.
+
+### BLS (next)
+- Wotan cleans; BLS searches. BLS folds the flattened curve on many trial
+  periods, slides a box, measures dip depth/SNR -> periodogram.
+- Gives: best P, T0, duration, depth, SNR. Assumes box shape, strict periodicity.
+- Plan: stack flat data -> clip upward outliers only -> narrow period grid
+  around published P (±10 sigma, step = P*dur/baseline/3) -> BoxLeastSquares
+  -> compare peak with published P.
+- Order: c first (control, should return published P), then b, then d.
+- Peak at grid edge -> widen range.
+- After BLS: rebuild masks with new ephemerides, re-detrend (second pass),
+  then injection-recovery, then proper transit-model fit.
