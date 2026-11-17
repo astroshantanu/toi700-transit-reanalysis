@@ -76,7 +76,7 @@
 - The lightkurve warning about 30% of cadences masked (5871/19412) is the default quality mask; it did not refer to sector 6 (14,483 before clipping)
 
 
-## ## TOI-700 reanalysis: detrending (wotan) and BLS prep — log
+## ## TOI-700 reanalysis: detrending (wotan) and BLS prep (16 Nov 2026)
 
 ### What wotan does
 - Removes slow trends (stellar variability, pointing, scattered light); keeps transits.
@@ -119,7 +119,10 @@
   vs paper; try central-half window test.
 - `expected = 2*half*720` assumes 2-min cadence; wrong for 20 s / 200 s sectors.
 - coverage(): add out-of-transit baseline column (distance to nearest gap).
-- Sector 27 residual noise: check with robust std.
+- Sector 27 residual noise: robust 1-hour scatter 403 ppm vs 328 ppm white-noise
+  expectation (1.23x; plain std gave 1.34x, inflated by outliers near t~2041.6).
+  Small correlated noise left; not blocking. BLS uses per-sector robust sigma
+  as dy so noisier sectors get less weight.
 
 ### BLS (next)
 - Wotan cleans; BLS searches. BLS folds the flattened curve on many trial
@@ -132,3 +135,22 @@
 - Peak at grid edge -> widen range.
 - After BLS: rebuild masks with new ephemerides, re-detrend (second pass),
   then injection-recovery, then proper transit-model fit.
+
+### BLS results (pass 1, masks from old ephemerides, window 14.4 h) Date: 17/11/26
+- Setup: per-sector robust sigma as dy; durations 0.6-1.5 x T14; period grid
+  ±20 sigma around published P; step = P*dur_min/baseline/3.
+- c (control): P offset +0.02 sigma, SNR 57.8 -> pipeline works.
+  Depth 2425 ppm = 0.74 of k^2. Hypothesis: high impact parameter (published
+  T14 = 1.41 h is short for P = 16 d) -> limb darkening + long ingress/egress.
+  Test with batman fit, not box.
+- b: P offset +0.9 sigma (consistent with paper), SNR 19.7, depth 445 ppm (0.91 k^2).
+  Published times drift ~86 min by end of data (P_err x ~267 orbits) -> explains
+  late-sector depth dilution in Test 1. The planet did not change.
+- d: P offset -2.3 sigma (37.42367 vs 37.426), SNR 17.4, depth 599 ppm (0.87 k^2).
+  Published times miss transit by ~235 min at end of data (> duration 196 min).
+  Weaker bump at +0.004-0.006 d (SNR ~11) -> check.
+- Odd/even depths agree within ~2 sigma for all three.
+- BLS periods have NO error bars; need timing fit / MCMC for uncertainties.
+- TODO: pass 2 (re-mask with new ephemerides, re-detrend, rerun BLS); refine
+  periods; check d bump and sector-27 dip near t~2041.5-2041.6; batman fit;
+  injection-recovery.
