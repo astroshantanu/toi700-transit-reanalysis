@@ -154,3 +154,21 @@
 - TODO: pass 2 (re-mask with new ephemerides, re-detrend, rerun BLS); refine
   periods; check d bump and sector-27 dip near t~2041.5-2041.6; batman fit;
   injection-recovery.
+
+  ### BLS period uncertainties (bootstrap over sectors, 200 resamples)
+- Method: resample 37 sectors with replacement, rerun BLS on fine grid
+  (1-min shift of last transit per step, ±45 min), take spread of best P.
+  Error = (P84 - P16)/2. Likelihood-curve method FAILED (BLS peak is a cusp,
+  width fell below grid step) -> do not use.
+- Results (P +/- err, d):
+  b 9.977211 +/- 0.000023 (paper 9.97701 +/- 0.00028; +0.7 sigma; 12x better)
+  c 16.051120 +/- 0.000013 (paper 16.051098 +/- 0.000092; +0.24 sigma; 7x better)
+  d 37.423631 +/- 0.000093 (paper 37.426 +/- 0.001; -2.4 sigma; 11x better)
+- Timing uncertainty at end of data (~7 yr): b 108 -> ~9 min, c 22 -> ~3 min,
+  d 102 -> ~10 min (period error only; ignores T0 and correlation).
+- Caveats: statistical only; inflate 30-50% for a first report; c's error is
+  only 3 grid steps wide (rerun with 30 s steps); bootstrap grid too narrow to
+  test d's second bump (+0.004-0.006 d) -> run wide bootstrap check.
+- File: ../data/bls_period_bootstrap.csv
+- NEXT: check edge/bump, then pass 2 (re-mask with new ephemerides, re-detrend,
+  rerun BLS), then batman fit, injection-recovery.
