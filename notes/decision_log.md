@@ -172,3 +172,33 @@
 - File: ../data/bls_period_bootstrap.csv
 - NEXT: check edge/bump, then pass 2 (re-mask with new ephemerides, re-detrend,
   rerun BLS), then batman fit, injection-recovery.
+## BLS, new ephemerides, pass 2 (19 Nov 2026)
+
+WHAT I DID
+- Stacked all 37 flattened sectors (589,399 points; a second 4-sigma upward clip removed 19 more), baseline 2663 d.
+- BLS near each planet's published period (box widths 0.6-1.5 x T14), all sectors together.
+- Bootstrap over sectors (200 resamples, drawn with replacement) for the period error.
+- Pass 2: rebuilt transit masks from my new periods, re-detrended, repeated BLS and the depth test.
+
+RESULTS (period in days)
+  b 9.977211 +/- 0.000022   (2020 paper 9.97701 +/- 0.00028; 2023 paper 9.977219 +/- 0.000041)
+  c 16.051120 +/- 0.000013  (2020: 16.051098 +/- 0.000092; 2023: 16.051137 +/- 0.000020)
+  d 37.423631 +/- 0.000093  (2020: 37.4260 +/- 0.0010; 2023: 37.42396 +/- 0.00039)
+- d is 2.4 sigma below the 2020 period but 0.8 sigma from the 2023 one: the 2020 period had drifted.
+- Gain over the 2023 errors is about 1.9x (b), 1.5x (c), 4.2x (d); over 2020 about 12x, 7x, 11x.
+- c odd/even depths agree (2439 vs 2410 ppm). No peak at the grid edge. No competing peak for d within +/-0.02 d.
+- Pass 2: d BLS S/N 17.4 -> 18.7; masked fraction 3.4% -> 2.8%.
+- Depth test after pass 2 (ppm, Tier A / later): b 530/410, c 1970/2110, d 660/450 (before: b 420/270, d 700/190).
+- BLS depth / k^2 (2023 radii): b 1.13, c 0.76, d 1.18. Fits limb darkening (central vs near-edge transits).
+
+CAUTIONS
+- BLS S/N assumes white noise; red noise makes true S/N about 20% lower.
+- Pass 1 = pass 2 in period only because the search grid was not re-centred.
+- T0 error not yet measured; mask padding of 0.01 d is a guess.
+
+NEXT
+1. Bootstrap T0, finer period grid for c.
+2. Literature comparison table (2020 and 2023).
+3. Save pass-2 data; move functions into src/.
+4. Blind BLS over 1-60 d (optional: look for planet e at 27.8 d after masking b, c, d).
+5. Phase 4: transit fits, starting with c.
