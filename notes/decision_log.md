@@ -202,3 +202,29 @@ NEXT
 3. Save pass-2 data; move functions into src/.
 4. Blind BLS over 1-60 d (optional: look for planet e at 27.8 d after masking b, c, d).
 5. Phase 4: transit fits, starting with c.
+
+## Ephemeris bootstrap and first batman fit, planet c (25 Nov 2026)
+
+WHAT I DID
+- Moved the pipeline into src/pipeline.py, pass-2 ephemerides into src/eph_pass2.py; checkpoints in data/.
+- Bootstrap of period AND T0 (200 resamples of whole sectors), saved in data/ephemeris_bootstrap_pass2.csv.
+- Started Phase 4: batman + emcee fit of planet c (9 parameters: T0, P, k, b, rho, q1, q2, f0, lns), 36 walkers x 15000 steps. Density prior 8.0 +/- 1.8 g/cm3 (2020 paper); uniform Kipping q1, q2; circular orbit; 2-min exposure supersampled x3.
+
+RESULTS
+- Bootstrap (P in d, T0 in BTJD at mid-data):
+    b P 9.977214 +/- 0.000022, T0 2658.3228 +/- 0.0016 (2.3 min)
+    c P 16.051109 +/- 0.000012, T0 2656.2789 +/- 0.0006 (0.8 min)   (finer grid did not change c's error)
+    d P 37.423557 +/- 0.000098, T0 2640.3097 +/- 0.0028 (4.1 min)
+- Planet c fit: k 0.0572 +0.0027 -0.0024, b 0.900 +0.013 -0.020, a/Rs 48.9, T14 1.399 h, rho 8.6 +/- 1.2, depth k^2 3267 ppm, Rp about 2.62 Re (R* = 0.420). All within errors of the 2020 paper; T14 about 3x tighter.
+- Fit period error (6e-6 d) is half the bootstrap error (1.2e-5 d): the fit assumes white noise.
+
+PROBLEM FOUND
+- Corner plot showed a second small blob (k about 0.038, b about 0) and acceptance min 0.01: a stuck walker. The half-chain test could not catch it.
+- Fix: drop walkers with acceptance < 0.1 or mean log_prob 10 below the median. For b and d: start walkers in a ball around an optimizer solution.
+
+NEXT
+1. Remove stuck walker(s), redo table and corner plot for c; print lns.
+2. Robustness runs for c: 2023 density prior (7.86 +/- 0.90); flat density prior (independent stellar density).
+3. Limb-darkening priors from tables (decide and log).
+4. Fit b and d with the same code (move into src/).
+5. Still open from Phase 3: literature comparison table, blind BLS over 1-60 d.
